@@ -11,6 +11,14 @@
 - **Windows 10/11**：运行 `TransRing-<版本>-win-Setup.exe`，或解压 `win-Portable.zip` 直接运行 `TransRing.exe`。安装程序可添加右键菜单、开机启动、`transring` 命令行和可选转换引擎。
 - **macOS 14+**（预览版）、**Linux**（预览版）：见原项目说明。
 
+## 购买 Buy
+
+**$29 一次性买断**（终身授权，含 v1.x 免费更新）— Pay with PayPal:
+
+👉 **https://paypal.me/huoyuan453/29**
+
+付款时请在备注里留下你的邮箱，下载与授权信息将发送到该邮箱。One-time payment via PayPal — please leave your email in the payment note for delivery.
+
 ## 特性
 
 - **鼠标位置的圆环**：按住按键拖文件，只显示适合这些文件的格式
