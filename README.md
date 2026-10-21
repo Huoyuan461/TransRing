@@ -42,3 +42,5 @@ dotnet run --project src/TransRing.App
 ## 许可证
 
 MIT。转环基于开源项目 [Filee](https://github.com/KnifeLemon/Filee)（© 2026 Myeonggu Kim，MIT）的二次开发品牌版；随附的第三方组件许可证见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。转换引擎（FFmpeg、Ghostscript 等）为独立进程、由用户按需从官网下载，不随安装包分发。
+
+<!-- sponsors: src/TransRing.App/Assets/Sponsors/sponsors.json -->
