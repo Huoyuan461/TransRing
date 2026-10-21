@@ -127,7 +127,7 @@ Filename: "{app}\{#AppExe}"; Parameters: "--uninstall-cleanup"; Flags: runhidden
 const
   // ExplorerMenuPackage in src/TransRing.Platform.Windows (InstallerScriptTests keeps these in sync).
   ExplorerMenuName = 'TransRing.ExplorerMenu';
-  ExplorerMenuFamily = 'TransRing.ExplorerMenu_c73vxh346rtay';
+  ExplorerMenuFamily = 'TransRing.ExplorerMenu_ttj5c3stbdy7j';
   ExplorerMenuDll = 'TransRingExplorerMenu.dll';
   ExplorerMenuPackageFile = 'TransRingExplorerMenu.msix';
   ExplorerMenuMinimumBuild = 22000;

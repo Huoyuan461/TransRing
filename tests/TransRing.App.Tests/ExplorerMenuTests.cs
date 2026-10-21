@@ -224,9 +224,9 @@ public class ExplorerMenuTests
             "Run build/build-explorer-menu.ps1 first (x64 Windows).");
 
         using var command = NativeCommand.Create(dll);
-        // The title comes from the file the app writes into its data folder; without it the English default is used.
+        // The title comes from the file the app writes into its data folder; without it the Chinese default is used.
         var expectedTitle = ExplorerMenuRegistration.ReadTitle();
-        Assert.Equal(expectedTitle ?? "Convert with TransRing", command.GetTitle());
+        Assert.Equal(expectedTitle ?? "用转环转换", command.GetTitle());
         Assert.Equal(Path.Combine(BuiltFolder, "TransRing.exe") + ",0", command.GetIcon(), ignoreCase: true);
         Assert.Equal(ExplorerMenuPackage.ClassId, command.GetCanonicalName());
 
