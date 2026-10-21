@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TransRing.Core/TransRing.Core.csproj" />
+    <Project Path="src/TransRing.Engines/TransRing.Engines.csproj" />
+    <Project Path="src/TransRing.Platform.Windows/TransRing.Platform.Windows.csproj" />
+    <Project Path="src/TransRing.Platform.Linux/TransRing.Platform.Linux.csproj" />
+    <Project Path="src/TransRing.Platform.MacOS/TransRing.Platform.MacOS.csproj" />
+    <Project Path="src/TransRing.App/TransRing.App.csproj" />
+    <Project Path="src/TransRing.Cli/TransRing.Cli.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TransRing.Core.Tests/TransRing.Core.Tests.csproj" />
+    <Project Path="tests/TransRing.Engines.Tests/TransRing.Engines.Tests.csproj" />
+    <Project Path="tests/TransRing.App.Tests/TransRing.App.Tests.csproj" />
+    <Project Path="tests/TransRing.Cli.Tests/TransRing.Cli.Tests.csproj" />
+    <Project Path="tests/TransRing.Platform.Tests/TransRing.Platform.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path=".editorconfig" />
+  </Folder>
+</Solution>

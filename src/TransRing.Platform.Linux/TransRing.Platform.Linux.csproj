@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>TransRing.Platform.Linux</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TransRing.Core\TransRing.Core.csproj" />
+    <InternalsVisibleTo Include="TransRing.Platform.Tests" />
+  </ItemGroup>
+</Project>

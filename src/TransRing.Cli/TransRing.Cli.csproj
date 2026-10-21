@@ -1,0 +1,27 @@
+<!--
+  TransRing.Cli: the "transring" command line. Converts files and watches folders without the tray app, with the same
+  engines, presets and settings. Published next to TransRing.exe as transring-cli.exe (one runtime for both); the installer
+  puts a "transring" shim on PATH (cli\transring.cmd).
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>transring-cli</AssemblyName>
+    <RootNamespace>TransRing.Cli</RootNamespace>
+    <ApplicationIcon>..\TransRing.App\Assets\Icons\transring.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TransRing.Core\TransRing.Core.csproj" />
+    <ProjectReference Include="..\TransRing.Engines\TransRing.Engines.csproj" />
+  </ItemGroup>
+
+  <!-- Error messages and built-in preset names, in English (the app's translation file). -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\TransRing.App\Assets\i18n\en.json" LogicalName="TransRing.Cli.en.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TransRing.Cli.Tests" />
+  </ItemGroup>
+</Project>
