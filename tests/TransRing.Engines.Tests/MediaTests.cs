@@ -681,7 +681,7 @@ public class MediaTests(EngineFixture fx) : IClassFixture<EngineFixture>
         // The coded pictures are the source's, byte for byte.
         async Task<string> Hash(string file)
         {
-            var hash = await ProcessRunner.RunAsync(Tools.Value.Ffmpeg,
+            var hash = await ProcessRunner.RunAsync(Tools!.Value.Ffmpeg,
                 ["-hide_banner", "-v", "error", "-i", file, "-map", "0:v", "-c", "copy", "-f", "hash", "-hash", "md5", "-"],
                 TimeSpan.FromMinutes(1), CancellationToken.None);
             return hash.StandardOutput.Trim();

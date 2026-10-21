@@ -60,7 +60,7 @@ public class MsgTests(EngineFixture fx) : IClassFixture<EngineFixture>
         Assert.Equal(new DateTimeOffset(2026, 10, 1, 0, 30, 0, TimeSpan.Zero), mime.Date.ToUniversalTime());
         Assert.Equal("meeting-1@example.com", mime.MessageId);
         // MimeKit writes the EML with the platform's line endings (LF on macOS and Linux).
-        Assert.Equal("안녕하세요. 자료를 보냅니다.\n둘째 줄", mime.TextBody.TrimEnd().ReplaceLineEndings("\n"));
+        Assert.Equal("안녕하세요. 자료를 보냅니다.\n둘째 줄", mime.TextBody!.TrimEnd().ReplaceLineEndings("\n"));
         Assert.Contains("<img src=\"cid:logo@transring\">", mime.HtmlBody);
 
         var attachments = mime.Attachments.ToList();
@@ -68,11 +68,11 @@ public class MsgTests(EngineFixture fx) : IClassFixture<EngineFixture>
         var pdf = Assert.IsType<MimePart>(attachments[0]);
         Assert.Equal("보고서.pdf", pdf.FileName);
         using var data = new MemoryStream();
-        await pdf.Content.DecodeToAsync(data, TestContext.Current.CancellationToken);
+        await pdf.Content!.DecodeToAsync(data, TestContext.Current.CancellationToken);
         Assert.Equal(Report, data.ToArray());
         var attached = Assert.IsType<MessagePart>(attachments[1]);
-        Assert.Equal("Earlier mail", attached.Message.Subject);
-        Assert.Equal("older text", attached.Message.TextBody.TrimEnd());
+        Assert.Equal("Earlier mail", attached.Message!.Subject);
+        Assert.Equal("older text", attached.Message!.TextBody!.TrimEnd());
         Assert.Contains(mime.BodyParts.OfType<MimePart>(), p => p.ContentId == "logo@transring");
     }
 
