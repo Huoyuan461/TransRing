@@ -21,6 +21,9 @@
 #ifndef PublishDir
   #error PublishDir is not defined: build with build/build-installer.ps1
 #endif
+#ifndef AppSuffix
+  #define AppSuffix ""
+#endif
 
 #define AppName "转环"
 #define AppExe "TransRing.exe"
@@ -56,7 +59,7 @@ WizardStyle=modern dynamic
 WizardImageFile=wizard-light.png
 WizardImageFileDynamicDark=wizard-dark.png
 WizardSmallImageFile=..\src\TransRing.App\Assets\Icons\transring.png
-OutputBaseFilename=TransRing-{#AppVersion}-win-Setup
+OutputBaseFilename=TransRing-{#AppVersion}{#AppSuffix}-win-Setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 ; TransRing is closed by PrepareToInstall; Restart Manager is only the fallback, and only for TransRing.exe: with DLLs in the

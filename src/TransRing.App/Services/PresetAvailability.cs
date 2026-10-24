@@ -15,6 +15,18 @@ public sealed class PresetAvailability(ConverterCatalog catalog, ILocalizer loc,
     /// </summary>
     public string? Check(Preset preset, IReadOnlyList<FileFormat> formats)
     {
+        // Free edition: paid-only targets (and, for "same as source", paid-only sources) are greyed out
+        // with the upgrade reason instead of running into a queue rejection. The queue enforces this
+        // too; this is only the donut's visible side of the same rule.
+        if (Edition.IsFree)
+        {
+            if (preset.TargetFormat != BuiltInData.SameAsSource && !Edition.IsFreeFormat(preset.TargetFormat))
+                return Edition.FreeTargetNotSupported;
+            if (preset.TargetFormat == BuiltInData.SameAsSource && formats.Count > 0
+                && formats.All(f => !Edition.IsFreeFormat(f.Id)))
+                return Edition.FreeSourceNotSupported;
+        }
+
         // "Compress into one archive" packs the files as they are, so any file works, even of an unknown type.
         if (preset.Archive.CombineIntoOne
             && FormatRegistry.FindById(preset.TargetFormat) is { Category: FormatCategory.Archive } archive

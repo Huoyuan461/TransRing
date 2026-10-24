@@ -28,7 +28,9 @@ param(
     [string]$PublishDir,
     [string]$OutputDir = (Join-Path $PSScriptRoot '..\Releases'),
     [switch]$Portable,
-    [switch]$CheckOnly
+    [switch]$CheckOnly,
+    # Free edition: publish with -p:TransRingFree=true and name the installer TransRing-<Version>-free-win-Setup.exe.
+    [switch]$Free
 )
 
 $ErrorActionPreference = 'Stop'
@@ -96,15 +98,17 @@ if ($CheckOnly) {
 elseif (-not $PublishDir) {
     $PublishDir = Join-Path $root 'publish\win-x64'
     Remove-Item $PublishDir -Recurse -Force -ErrorAction SilentlyContinue
+    $freeArgs = @()
+    if ($Free) { $freeArgs = @('-p:TransRingFree=true') }
     Invoke-Checked 'dotnet publish' {
         dotnet publish (Join-Path $root 'src\TransRing.App\TransRing.App.csproj') -c Release -r win-x64 --self-contained `
-            "-p:Version=$Version" -p:PublishReadyToRun=true -p:TransRingRelease=true -o $PublishDir
+            "-p:Version=$Version" -p:PublishReadyToRun=true -p:TransRingRelease=true @freeArgs -o $PublishDir
     }
     # The command line, in the same folder so it shares the runtime and the engines (transring-cli.exe). Its name can't
     # be transring.exe next to TransRing.exe, so the "transring" command is cli\transring.cmd, which the installer can put on PATH.
     Invoke-Checked 'dotnet publish (cli)' {
         dotnet publish (Join-Path $root 'src\TransRing.Cli\TransRing.Cli.csproj') -c Release -r win-x64 --self-contained `
-            "-p:Version=$Version" -p:PublishReadyToRun=true -p:TransRingRelease=true -o $PublishDir
+            "-p:Version=$Version" -p:PublishReadyToRun=true -p:TransRingRelease=true @freeArgs -o $PublishDir
     }
     New-Item -ItemType Directory -Force -Path (Join-Path $PublishDir 'cli') | Out-Null
     Set-Content (Join-Path $PublishDir 'cli\transring.cmd') "@`"%~dp0..\transring-cli.exe`" %*" -Encoding ascii
@@ -127,9 +131,11 @@ finally {
 
 Write-Host "compile installer $Version"
 $options = @('/Q', "/DAppVersion=$Version", "/DPublishDir=$PublishDir", "/O$OutputDir")
+if ($Free) { $options += '/DAppSuffix=-free' }
 if ($CheckOnly) { $options += '--no-compression' }
 Invoke-Checked 'ISCC' { & $iscc @options (Join-Path $root 'installer\TransRing.iss') }
-$setupExe = Join-Path $OutputDir "TransRing-$Version-win-Setup.exe"
+$suffix = if ($Free) { '-free' } else { '' }
+$setupExe = Join-Path $OutputDir "TransRing-$Version$suffix-win-Setup.exe"
 if (-not (Test-Path $setupExe)) { throw "ISCC did not write $setupExe" }
 if ($CheckOnly) {
     Write-Host "installer/TransRing.iss compiles"
@@ -138,7 +144,7 @@ if ($CheckOnly) {
 
 $files = @($setupExe)
 if ($Portable) {
-    $zip = Join-Path $OutputDir "TransRing-$Version-win-Portable.zip"
+    $zip = Join-Path $OutputDir "TransRing-$Version$suffix-win-Portable.zip"
     Remove-Item $zip -ErrorAction SilentlyContinue
     Write-Host "zip  $zip"
     Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -147,7 +153,7 @@ if ($Portable) {
 }
 
 # Checksums for people who verify their download.
-$sums = Join-Path $OutputDir "TransRing-$Version-SHA256SUMS.txt"
+$sums = Join-Path $OutputDir "TransRing-$Version$suffix-SHA256SUMS.txt"
 $files | ForEach-Object { "$((Get-FileHash $_ -Algorithm SHA256).Hash.ToLowerInvariant())  $(Split-Path $_ -Leaf)" } |
     Set-Content $sums -Encoding ascii
 Get-Item ($files + $sums) | Format-Table Name, Length

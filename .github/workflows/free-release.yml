@@ -1,0 +1,72 @@
+# Builds the FREE edition Windows installer and publishes it to GitHub Releases.
+# Trigger: push a tag like free-v1.0.0  (git tag free-v1.0.0 && git push origin free-v1.0.0)
+# The tag name deliberately does NOT match the paid release workflow's 'v*' pattern,
+# so a free tag never triggers a paid release build.
+#
+# Output (build/build-installer.ps1 -Free): TransRing-<version>-free-win-Setup.exe
+# and TransRing-<version>-free-SHA256SUMS.txt. Same AppId as the paid installer, so
+# installing the paid build later upgrades the free install in place.
+# Tests: only the free-edition tests run here. The full suite asserts paid behavior
+# (multi-file batch, paid-only formats), which the free build refuses by design.
+name: Free release
+
+on:
+  push:
+    tags: ['free-v*']
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}' -replace '^free-v', ''
+          "value=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Fonts
+        shell: pwsh
+        run: ./build/fetch-fonts.ps1
+
+      - name: Restore Zig toolchain
+        uses: actions/cache/restore@v4
+        with:
+          path: build/.cache/zig-x86_64-windows-0.16.0
+          key: zig-0.16.0-x86_64-windows
+
+      - name: Build (free edition)
+        run: dotnet build TransRing.slnx -c Release -p:TransRingFree=true
+
+      - name: Free edition tests
+        run: dotnet test tests/TransRing.Core.Tests --no-build -c Release --filter "FullyQualifiedName~FreeEdition"
+
+      - name: Build free installer
+        shell: pwsh
+        run: ./build/build-installer.ps1 -Version ${{ steps.version.outputs.value }} -Free
+
+      - name: Publish the free release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = '${{ steps.version.outputs.value }}'
+          $files = Get-ChildItem Releases -File -Filter "TransRing-$version-free-*" | ForEach-Object FullName
+          if (-not $files) { throw "No free installer files in Releases" }
+          $notes = @"
+          TransRing $version 免费版：本地文件格式转换，拖放即转，无需其他软件。
+          
+          免费版包含：常用图片、PDF 与主流 Word / Excel / PowerPoint 格式互转；一次 1 个文件；单文件上限 100MB。
+          完整版（`$29 一次性买断）解锁全部 244 种格式（含 CAD、3D、字体、电子书等）、多文件批量转换与不限文件大小，购买链接见产品页 https://huoyuan461.github.io/TransRing/ 。
+          免费版与完整版共用同一安装标识，之后安装完整版可直接升级覆盖。
+          "@
+          gh release create '${{ github.ref_name }}' --title "TransRing $version 免费版" --notes $notes --verify-tag @files

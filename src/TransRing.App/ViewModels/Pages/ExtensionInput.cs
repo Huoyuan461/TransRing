@@ -45,7 +45,7 @@ public static class ExtensionInput
         var taken = existing.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var candidates = FormatRegistry.Known
-            .Where(f => f.Id != FormatRegistry.Folder)
+            .Where(f => f.Id != FormatRegistry.Folder && Edition.IsFreeFormat(f.Id))
             .SelectMany((format, formatIndex) => format.Extensions
                 .Where(e => e.Length > 0 && !taken.Contains(e))
                 .Select((extension, i) => (Extension: extension, Format: format, Order: formatIndex * 100 + i)));

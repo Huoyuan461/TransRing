@@ -53,7 +53,7 @@ public sealed partial class PresetEditorViewModel : ObservableObject
         [
             new Choice<string>(BuiltInData.SameAsSource, loc["presets.same_as_source"]),
             .. FormatRegistry.Known
-                .Where(f => f.Writable)
+                .Where(f => f.Writable && Edition.IsFreeFormat(f.Id))
                 .Select(f => new Choice<string>(
                     f.Id,
                     f.Id == FormatRegistry.Folder ? loc["presets.target_folder"] : f.DisplayName,

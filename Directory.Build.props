@@ -19,6 +19,12 @@
     <Authors>TransRing</Authors>
     <Copyright>Copyright (c) 2026 TransRing</Copyright>
 
+    <!-- Free edition switch: build with `-p:TransRingFree=true` and every project in this tree
+         compiles with TRANSRING_FREE (see TransRing.Core.Formats.Edition). Without it the build is
+         the full paid edition. Kept here, not in a single project, so Core and its consumers can
+         never disagree about the edition (a const would be inlined per assembly). -->
+    <DefineConstants Condition="'$(TransRingFree)' == 'true'">$(DefineConstants);TRANSRING_FREE</DefineConstants>
+
     <!-- Single source of truth for the GitHub repository (used by the updater and the About page). -->
     <TransRingRepositoryUrl>https://github.com/Huoyuan461/TransRing</TransRingRepositoryUrl>
     <RepositoryUrl>$(TransRingRepositoryUrl)</RepositoryUrl>

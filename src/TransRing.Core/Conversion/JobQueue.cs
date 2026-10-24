@@ -49,6 +49,7 @@ public sealed class JobQueue : IAsyncDisposable
     public ConversionJob Enqueue(IReadOnlyList<string> sources, Preset preset, string presetDisplayName)
     {
         var job = new ConversionJob(sources, preset, presetDisplayName);
+        EditionLimits.Apply(job);
         _channel.Writer.TryWrite(job);
         JobUpdated?.Invoke(this, job);
         return job;
@@ -59,6 +60,17 @@ public sealed class JobQueue : IAsyncDisposable
     {
         job.State = JobState.Running;
         Notify(job);
+
+        // Free edition limits, also for jobs built directly (Cli, tests): Enqueue already applied them,
+        // and Apply is idempotent. A job with nothing left to convert ends here, visibly failed.
+        EditionLimits.Apply(job);
+        if (job.Files.Count > 0 && job.Files.All(f => f.State == FileState.Failed))
+        {
+            job.State = JobState.Failed;
+            Notify(job);
+            JobFinished?.Invoke(this, job);
+            return;
+        }
 
         var workDir = Path.Combine(Path.GetTempPath(), "TransRing", job.Id);
         Directory.CreateDirectory(workDir);
@@ -215,7 +227,8 @@ public sealed class JobQueue : IAsyncDisposable
         foreach (var file in job.Files)
         {
             // Folders (from the command line; drops deliver files) are packed with their content.
-            if (File.Exists(file.SourcePath) || Directory.Exists(file.SourcePath))
+            // Files already rejected (e.g. by the free edition limits) never reach the packer.
+            if (file.State == FileState.Pending && (File.Exists(file.SourcePath) || Directory.Exists(file.SourcePath)))
                 inputs.Add(file);
             else
                 MarkFailed(file, "The file no longer exists.");
@@ -322,6 +335,10 @@ public sealed class JobQueue : IAsyncDisposable
         ConversionJob job, FileResult file, int index, RoutePlanner planner, string workDir, bool finalOutput,
         string intermediate = "pdf")
     {
+        // Already decided before dispatch (e.g. rejected by the free edition limits): never convert.
+        if (file.State != FileState.Pending)
+            return [];
+
         var ct = job.CancellationToken;
         var source = FormatRegistry.Detect(file.SourcePath);
         if (source is null)
@@ -330,6 +347,11 @@ public sealed class JobQueue : IAsyncDisposable
         var target = !finalOutput ? intermediate
             : job.Preset.TargetFormat == BuiltInData.SameAsSource ? source.Id
             : job.Preset.TargetFormat;
+
+        // Defense in depth for the final output: the free edition never writes a paid-only target,
+        // even if a job was assembled without going through EditionLimits.Apply.
+        if (finalOutput && !Edition.IsFreeFormat(target))
+            return Fail(file, "error.conversion_failed", Edition.FreeTargetNotSupported);
 
         var route = planner.Plan(source.Id, target);
         if (route is null)
